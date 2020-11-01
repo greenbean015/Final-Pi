@@ -13,35 +13,19 @@ class Game(Frame):
 
 # sets up the GUI
     def setupGUI(self):
-        # organize the GUI
+        # Makes the frame the size of the window
         self.pack(fill=BOTH, expand=1)
-        # setup the player input at the bottom of the GUI
-        # the widget is a Tkinter Entry
-        # set its background to white and bind the return key to the
-        # function process in the class
-        # push it to the bottom of the GUI and let it fill
-        # horizontally
-        # give it focus so the player doesn't have to click on it
+        #Create label that tells the user that to put in textbox
+        Game.instructLabel = Label(self, text = "What Ingredients do you have?")
+        Game.instructLabel.pack(anchor=NW)
+        #Creates the Textbox
         Game.player_input = Entry(self, bg="white")
         Game.player_input.bind("<Return>", self.process) #functin that will process input from user 
-        Game.player_input.pack(side=BOTTOM, fill=X)
+        Game.player_input.pack(side=TOP, fill=X)
         Game.player_input.focus()
-        
-        
-
-        # setup the text to the right of the GUI
-        # first, the frame in which the text will be placed
-        text_frame = Frame(self, width=WIDTH // 2)
-        # the widget is a Tkinter Text
-        # disable it by default
-        # don't let the widget control the frame's size
-        Game.text = Text(text_frame, bg="lightgrey", state=DISABLED)
-        Game.text.pack(fill=Y, expand=1)
-        text_frame.pack(side=RIGHT, fill=Y)
-        text_frame.pack_propagate(False)
-    def play(self):
-        self.setupGUI()
-        
+        # Creates response Label
+        Game.responseLabel = Label(window, text = "response")
+        Game.responseLabel.pack(side=BOTTOM)
 
     def process(self, event):
         action = Game.player_input.get()
@@ -49,23 +33,8 @@ class Game(Frame):
         response = "invlit input try again"
 
         words = action.split()
-        
-        if (action == "quit" or action == "exit"):
-            exit(0)
-        if (len(words) == 1):
-            mainfood = words[0]
-
-
-            if (mainfood == "meat"):
-                print ("ayyyy")
-                reponse = "this is a food!"
-
-            else:
-                print (response)
-        else:
-            print ("please use one word")
-        
-
+        # Change Response Label
+        Game.responseLabel.configure(text = response)
 
 
 # the default size of the GUI is 800x600
@@ -75,11 +44,12 @@ HEIGHT = 600
 # create the window
 window = Tk()
 window.title("Recipies")
+window.minsize(WIDTH, HEIGHT)
 
-# create the GUI as a Tkinter canvas inside the window
+# create the GUI as a Tkinter Frame inside the window
 g = Game(window)
-# play the game
-g.play()
+# create GUI elements
+g.setupGUI()
 
 # wait for the window to close
 window.mainloop()
