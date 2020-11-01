@@ -15,28 +15,38 @@ class Game(Frame):
     def setupGUI(self):
         # Makes the frame the size of the window
         self.pack(fill=BOTH, expand=1)
+        
         #Create label that tells the user that to put in textbox
         Game.instructLabel = Label(self, text = "What Ingredients do you have?")
-        Game.instructLabel.pack(anchor=NW)
+        Game.instructLabel.pack(anchor=N)
+        
+        # Creates response Label
+        Game.responseLabel = Label(self, text = "response", bg = "white")
+        Game.responseLabel.pack(side = TOP, fill = BOTH, ipady=300)
+        
         #Creates the Textbox
         Game.player_input = Entry(self, bg="white")
-        Game.player_input.bind("<Return>", self.process) #functin that will process input from user 
-        Game.player_input.pack(side=TOP, fill=X)
+        #functin that will process input from user
+        Game.player_input.bind("<Return>", self.process)  
+        Game.player_input.pack(side=BOTTOM, fill=X)
         Game.player_input.focus()
-        # Creates response Label
-        Game.responseLabel = Label(window, text = "response")
-        Game.responseLabel.pack(side=BOTTOM)
+        
+        
 
     def process(self, event):
+        #take the input from the input line and sets them all to lower case
         action = Game.player_input.get()
         action = action.lower()
         response = "invlit input try again"
 
         words = action.split()
         # Change Response Label
+        if (action == "meat"):
+            response = "das meat"
+            
         Game.responseLabel.configure(text = response)
 
-
+##################################################################################
 # the default size of the GUI is 800x600
 WIDTH = 800
 HEIGHT = 600
