@@ -21,7 +21,7 @@ class ControlFrame(Frame):
         
         # Creates response Label
         ControlFrame.responseLabel = Label(self, text = "response", bg = "white")
-        ControlFrame.responseLabel.pack(side = TOP, fill = BOTH, ipady=100)
+        ControlFrame.responseLabel.pack(side = TOP, fill = BOTH)
         
         #Creates the Textbox
         ControlFrame.player_input = Entry(self, bg="white")
@@ -51,6 +51,7 @@ class ControlFrame(Frame):
 
 class Recipe():
     def __init__(self, recipeJSON):
+        self.id = recipeJSON["id"]
         self.title = recipeJSON["title"]
         self.img = recipeJSON["image"]
         self.likes = recipeJSON["likes"]
@@ -68,14 +69,17 @@ class RecipeFrame(Frame):
     def setupGUI(self):
         self.pack(side=TOP, expand=1, fill=BOTH)
 
+        RecipeFrame.RecipeInfo = Text(self, state=DISABLED)
+        RecipeFrame.RecipeInfo.pack(side=TOP, fill = BOTH)
+
         RecipeFrame.instructLabel = Label(self, text = "Recipes")
         RecipeFrame.instructLabel.pack(anchor=N)
 
         # setup scroll bar
-        RecipeFrame.scroll = Scrollbar(self)
+        RecipeFrame.scroll = Scrollbar(window)
         RecipeFrame.scroll.pack(side = RIGHT, fill = Y)
         #create list
-        RecipeFrame.myList = Listbox(self)
+        RecipeFrame.myList = Listbox(window)
         RecipeFrame.myList.pack(side=TOP, expand=1, fill=BOTH)
         RecipeFrame.myList.bind('<<ListboxSelect>>', self.expandRecipe)
         #link scroll bar to listbox
@@ -86,8 +90,17 @@ class RecipeFrame(Frame):
         RecipeFrame.myList.insert(END, f"{Recipe.title}  |  Likes: {Recipe.likes}  |  Missing Ingredients: {Recipe.ingMiss}")
 
     def expandRecipe(self, event):
-        #TODO Check if this recipe is already displayed
-        print(ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]])
+        #makes this only run if an item is selected
+        if (RecipeFrame.myList.curselection()):
+            recipe = ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]]
+            #TODO Check if this recipe is already displayed
+            response = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/information?apiKey={api_key}")
+            responseJSON = response.json()
+            RecipeFrame.RecipeInfo.config(state=NORMAL)
+            RecipeFrame.RecipeInfo.delete("1.0", END)
+            sumarry = responseJSON["summary"]
+            RecipeFrame.RecipeInfo.insert(END, f"{recipe.title}\n\n{sumarry}")
+            #print(RecipeFrame.myList.curselection()[0])
 
 ##################################################################################
 api_key = "b29344da13414323bac320e823e7736a"
