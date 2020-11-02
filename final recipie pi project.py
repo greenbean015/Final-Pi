@@ -1,5 +1,7 @@
 from tkinter import *
+import requests
 
+api_key = "b29344da13414323bac320e823e7736a"
 
 class Game(Frame):
     # the constructor
@@ -25,7 +27,7 @@ class Game(Frame):
         Game.responseLabel.pack(side = TOP, fill = BOTH, ipady=300)
         
         #Creates the Textbox
-        Game.player_input = Entry(self, bg="white")
+        Game.player_input = Entry(self, bg="white", text="bread peanut butter jelly")
         #functin that will process input from user
         Game.player_input.bind("<Return>", self.process)  
         Game.player_input.pack(side=BOTTOM, fill=X)
@@ -35,15 +37,19 @@ class Game(Frame):
 
     def process(self, event):
         #take the input from the input line and sets them all to lower case
-        action = Game.player_input.get()
-        action = action.lower()
-        response = "invlit input try again"
+        action = Game.player_input.get().lower()
+        response = "invalid input try again"
 
-        words = action.split()
+        #If you put peanut butter it our program counts peanut and butter as two different ingredients
+        ingredients = action.split()
         # Change Response Label
-        if (action == "meat"):
-            response = "das meat"
-            
+        #response = requests.get(f"https://api.spoonacular.com/recipes/complexSearch?apiKey={api_key}")
+        response = requests.get(f"https://api.spoonacular.com/recipes/findByIngredients?apiKey={api_key}&ingredients={','.join(ingredients)}&number=2&ranking=2")
+
+        responseJSON = response.json()
+        for recipe in responseJSON:
+            print(recipe["id"])
+
         Game.responseLabel.configure(text = response)
 
 ##################################################################################
