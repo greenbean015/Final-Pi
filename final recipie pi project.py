@@ -24,7 +24,7 @@ class ControlFrame(Frame):
         ControlFrame.responseLabel.pack(side = TOP, fill = BOTH, ipady=100)
         
         #Creates the Textbox
-        ControlFrame.player_input = Entry(self, bg="white", text="bread peanut butter jelly")
+        ControlFrame.player_input = Entry(self, bg="white")
         #functin that will process input from user
         ControlFrame.player_input.bind("<Return>", self.process)  
         ControlFrame.player_input.pack(side=BOTTOM, fill=X)
@@ -37,26 +37,28 @@ class ControlFrame(Frame):
 
         #If you put peanut butter it our program counts peanut and butter as two different ingredients
         ingredients = action.split()
-        #response = requests.get(f"https://api.spoonacular.com/recipes/complexSearch?apiKey={api_key}")
-        response = requests.get(f"https://api.spoonacular.com/recipes/findByIngredients?apiKey={api_key}&ingredients={','.join(ingredients)}&number=1&ranking=2")
-
+        response = requests.get(f"https://api.spoonacular.com/recipes/findByIngredients?apiKey={api_key}&ingredients={','.join(ingredients)}&number=5&ranking=2")
         responseJSON = response.json()
         #create list of recipe items
-        Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON]
+        ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON]
 
         #add recipies to GUI
-        for recipe in Recipies:
+        for recipe in ControlFrame.Recipies:
             rFrame.addRecipe(recipe)
 
         #change response label text
-        ControlFrame.responseLabel.configure(text = response)
+        ControlFrame.responseLabel.configure(text = response.elapsed)
 
 class Recipe():
     def __init__(self, recipeJSON):
+        self.title = recipeJSON["title"]
         self.img = recipeJSON["image"]
+        self.likes = recipeJSON["likes"]
+        self.ingUsed = recipeJSON["usedIngredientCount"]
+        self.ingMiss = recipeJSON["missedIngredientCount"]
 
     def __str__(self):
-        pass
+        return self.title
 
 class RecipeFrame(Frame):
     def __init__(self, parent):
@@ -66,16 +68,26 @@ class RecipeFrame(Frame):
     def setupGUI(self):
         self.pack(side=TOP, expand=1, fill=BOTH)
 
-        # setup scroll bar
-        RecipeFrame.scroll = Scrollbar(self)
-        RecipeFrame.scroll.pack(side = RIGHT, fill = Y)
         RecipeFrame.instructLabel = Label(self, text = "Recipes")
         RecipeFrame.instructLabel.pack(anchor=N)
 
+        # setup scroll bar
+        RecipeFrame.scroll = Scrollbar(self)
+        RecipeFrame.scroll.pack(side = RIGHT, fill = Y)
+        #create list
+        RecipeFrame.myList = Listbox(self)
+        RecipeFrame.myList.pack(side=TOP, expand=1, fill=BOTH)
+        RecipeFrame.myList.bind('<<ListboxSelect>>', self.expandRecipe)
+        #link scroll bar to listbox
+        RecipeFrame.myList.config(yscrollcommand=RecipeFrame.scroll.set)
+        RecipeFrame.scroll.config(command=RecipeFrame.myList.yview)
+
     def addRecipe(self, Recipe):
-        # Download and encode the image to base64 (dosen't work)
-        dlimage = requests.get(Recipe.img).text()
-        print(dlimage)
+        RecipeFrame.myList.insert(END, f"{Recipe.title}  |  Likes: {Recipe.likes}  |  Missing Ingredients: {Recipe.ingMiss}")
+
+    def expandRecipe(self, event):
+        #TODO Check if this recipe is already displayed
+        print(ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]])
 
 ##################################################################################
 api_key = "b29344da13414323bac320e823e7736a"
@@ -88,6 +100,7 @@ window = Tk()
 window.title("Recipies")
 #window.geometry(f"{WIDTH}x{HEIGHT}")
 window.minsize(WIDTH, HEIGHT)
+#window.maxsize(WIDTH, HEIGHT)
 
 # create the controls GUI as a Tkinter Frame inside the window
 cFrame = ControlFrame(window)
