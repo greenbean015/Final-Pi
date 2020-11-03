@@ -41,7 +41,6 @@ class ControlFrame(Frame):
         responseJSON = response.json()
         #create list of recipe items
         ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON]
-
         #add recipies to GUI
         for recipe in ControlFrame.Recipies:
             rFrame.addRecipe(recipe)
