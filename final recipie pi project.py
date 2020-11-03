@@ -31,6 +31,7 @@ class ControlFrame(Frame):
         ControlFrame.player_input.focus()
         
     def process(self, event):
+        RecipeFrame.myList.delete(0, END)
         #take the input from the input line and sets them all to lower case
         action = ControlFrame.player_input.get().lower()
         response = "invalid input try again"
@@ -41,10 +42,10 @@ class ControlFrame(Frame):
         responseJSON = response.json()
         #create list of recipe items
         ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON]
-
         #add recipies to GUI
         for recipe in ControlFrame.Recipies:
             rFrame.addRecipe(recipe)
+            
 
         #change response label text
         ControlFrame.responseLabel.configure(text = response.elapsed)
