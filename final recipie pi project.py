@@ -1,4 +1,5 @@
 from tkinter import *
+import re
 import requests
 
 class ControlFrame(Frame):
@@ -16,15 +17,11 @@ class ControlFrame(Frame):
         self.pack(side=TOP, expand=1, fill=BOTH)
         
         #Create label that tells the user that to put in textbox
-        ControlFrame.instructLabel = Label(self, text = "What Ingredients do you have?")
+        ControlFrame.instructLabel = Label(self, text = "What Ingredients do you have?", font="helvetica")
         ControlFrame.instructLabel.pack(anchor=N)
         
-        # Creates response Label
-        ControlFrame.responseLabel = Label(self, text = "response", bg = "white")
-        ControlFrame.responseLabel.pack(side = TOP, fill = BOTH)
-        
         #Creates the Textbox
-        ControlFrame.player_input = Entry(self, bg="white")
+        ControlFrame.player_input = Entry(self, bg="white", font="helvetica")
         #functin that will process input from user
         ControlFrame.player_input.bind("<Return>", self.process)  
         ControlFrame.player_input.pack(side=BOTTOM, fill=X)
@@ -70,8 +67,8 @@ class RecipeFrame(Frame):
     def setupGUI(self):
         self.pack(side=TOP, expand=1, fill=BOTH)
 
-        RecipeFrame.RecipeInfo = Text(self, state=DISABLED)
-        RecipeFrame.RecipeInfo.pack(side=TOP, fill = BOTH)
+        RecipeFrame.RecipeSum = Text(self, state=DISABLED, wrap=WORD, font='helvetica')
+        RecipeFrame.RecipeSum.pack(side=TOP, fill = BOTH)
 
         RecipeFrame.instructLabel = Label(self, text = "Recipes")
         RecipeFrame.instructLabel.pack(anchor=N)
@@ -80,7 +77,7 @@ class RecipeFrame(Frame):
         RecipeFrame.scroll = Scrollbar(window)
         RecipeFrame.scroll.pack(side = RIGHT, fill = Y)
         #create list
-        RecipeFrame.myList = Listbox(window)
+        RecipeFrame.myList = Listbox(window, font="helvetica")
         RecipeFrame.myList.pack(side=TOP, expand=1, fill=BOTH)
         RecipeFrame.myList.bind('<<ListboxSelect>>', self.expandRecipe)
         #link scroll bar to listbox
@@ -97,11 +94,26 @@ class RecipeFrame(Frame):
             #TODO Check if this recipe is already displayed
             response = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/information?apiKey={api_key}")
             responseJSON = response.json()
-            RecipeFrame.RecipeInfo.config(state=NORMAL)
-            RecipeFrame.RecipeInfo.delete("1.0", END)
+            RecipeFrame.RecipeSum.config(state=NORMAL)
+            #clear textbox
+            RecipeFrame.RecipeSum.delete("1.0", END)
             sumarry = responseJSON["summary"]
-            RecipeFrame.RecipeInfo.insert(END, f"{recipe.title}\n\n{sumarry}")
-            #print(RecipeFrame.myList.curselection()[0])
+            fukyou = sumarry.replace("<b>", "").replace("</b>", "")
+            RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{fukyou}")
+            # Gives the summary box bold and other stuffs
+            RecipeFrame.formatSummary(self, sumarry, recipe)
+
+    def formatSummary(self, sumarry, recipe):
+        word_concord=re.finditer(r"<b>(.+?)<\/b>",sumarry)
+        i = 0
+        for word_found in word_concord:
+            start = RecipeFrame.RecipeSum.index(f"1.0+{word_found.start()+len(recipe.title) + 2 - i*7} chars")
+            end = RecipeFrame.RecipeSum.index(f"1.0+{word_found.end()+len(recipe.title) + 2 - (i+1)*7} chars")
+            RecipeFrame.RecipeSum.tag_add('bold', start, end)
+            i += 1
+        RecipeFrame.RecipeSum.tag_configure("bold", font='Helvetica 12 bold')
+        
+
 
 ##################################################################################
 api_key = "b29344da13414323bac320e823e7736a"
