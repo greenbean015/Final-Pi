@@ -1,6 +1,9 @@
 from tkinter import *
 import re
 import requests
+import ImageTk
+from io import BytesIO
+from PIL import Image
 
 class ControlFrame(Frame):
     # the constructor
@@ -42,10 +45,6 @@ class ControlFrame(Frame):
         #add recipies to GUI
         for recipe in ControlFrame.Recipies:
             rFrame.addRecipe(recipe)
-            
-
-        #change response label text
-        ControlFrame.responseLabel.configure(text = response.elapsed)
 
 class Recipe():
     def __init__(self, recipeJSON):
@@ -66,12 +65,14 @@ class RecipeFrame(Frame):
 
     def setupGUI(self):
         self.pack(side=TOP, expand=1, fill=BOTH)
+        RecipeFrame.instructLabel = Label(self, text = "Recipes")
+        RecipeFrame.instructLabel.pack(side=BOTTOM)
 
         RecipeFrame.RecipeSum = Text(self, state=DISABLED, wrap=WORD, font='helvetica')
-        RecipeFrame.RecipeSum.pack(side=TOP, fill = BOTH)
+        RecipeFrame.RecipeSum.pack(side=RIGHT, fill = BOTH)
 
-        RecipeFrame.instructLabel = Label(self, text = "Recipes")
-        RecipeFrame.instructLabel.pack(anchor=N)
+        RecipeFrame.imgLabel = Label(self)
+        RecipeFrame.imgLabel.pack(anchor=NW, fill=BOTH)
 
         # setup scroll bar
         RecipeFrame.scroll = Scrollbar(window)
@@ -90,21 +91,45 @@ class RecipeFrame(Frame):
     def expandRecipe(self, event):
         #makes this only run if an item is selected
         if (RecipeFrame.myList.curselection()):
+            # maybe save RecipeFrame.myList.curselection()[0] so we can ensure we work on the same is the prboem of making another varible that big
             recipe = ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]]
             #TODO Check if this recipe is already displayed
-            response = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/information?apiKey={api_key}")
-            responseJSON = response.json()
+            #make textbox editable
             RecipeFrame.RecipeSum.config(state=NORMAL)
-            #clear textbox
-            RecipeFrame.RecipeSum.delete("1.0", END)
-            sumarry = responseJSON["summary"]
-            fukyou = sumarry.replace("<b>", "").replace("</b>", "")
-            RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{fukyou}")
-            # Gives the summary box bold and other stuffs
-            RecipeFrame.formatSummary(self, sumarry, recipe)
+            #so we don't get more informaiton ona recipe more than once
+            if (hasattr(recipe, "summary")):
+                #clear textbox
+                RecipeFrame.RecipeSum.delete("1.0", END)
+                cleanSum = recipe.summary.replace("<b>", "").replace("</b>", "")
+                RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{cleanSum}")
+                RecipeFrame.formatSummary(self, recipe)
+            else:
+                response = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/information?apiKey={api_key}")
+                responseJSON = response.json()
+                #clear textbox
+                RecipeFrame.RecipeSum.delete("1.0", END)
+                #convert response to JSON object
+                sumarry = responseJSON["summary"]
+                #remove similar recipies, maybe we can do something with them
+                sumarry = sumarry[0:sumarry.rfind("Try <a href=")]
+                ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].summary = sumarry
+                cleanSum = sumarry.replace("<b>", "").replace("</b>", "")
+                RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{cleanSum}")
+                # Gives the summary box bold text
+                RecipeFrame.formatSummary(self, ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]])
+            #check if recipe already has the image downloaded
+            if (hasattr(ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]], "photo")):
+                RecipeFrame.imgLabel.config(image=ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo)
+            else:
+                response = requests.get(recipe.img)
+                image = Image.open(BytesIO(response.content))
+                photo = ImageTk.PhotoImage(image)
+                # save photo to og recipe object
+                ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo = photo
+                RecipeFrame.imgLabel.config(image=photo)
 
-    def formatSummary(self, sumarry, recipe):
-        word_concord=re.finditer(r"<b>(.+?)<\/b>",sumarry)
+    def formatSummary(self, recipe):
+        word_concord=re.finditer(r"<b>(.+?)<\/b>",recipe.summary)
         i = 0
         for word_found in word_concord:
             start = RecipeFrame.RecipeSum.index(f"1.0+{word_found.start()+len(recipe.title) + 2 - i*7} chars")
