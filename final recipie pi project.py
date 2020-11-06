@@ -20,17 +20,18 @@ class ControlFrame(Frame):
         self.pack(side=TOP, expand=1, fill=BOTH)
         
         #Create label that tells the user that to put in textbox
-        ControlFrame.instructLabel = Label(self, text = "What Ingredients do you have?", font="helvetica")
+        ControlFrame.instructLabel = Label(self, text = "What Ingredients do you have?", font="helvetica 22 bold")
         ControlFrame.instructLabel.pack(anchor=N)
         
         #Creates the Textbox
-        ControlFrame.player_input = Entry(self, bg="white", font="helvetica")
+        ControlFrame.player_input = Entry(self, bg="white", font="helvetica 16")
         #functin that will process input from user
         ControlFrame.player_input.bind("<Return>", self.process)  
         ControlFrame.player_input.pack(side=BOTTOM, fill=X)
         ControlFrame.player_input.focus()
         
     def process(self, event):
+        #resets the recepie list when one a word is entered
         RecipeFrame.myList.delete(0, END)
         #take the input from the input line and sets them all to lower case
         action = ControlFrame.player_input.get().lower()
