@@ -41,6 +41,15 @@ class ControlFrame(Frame):
         ingredients = action.split()
         response = requests.get(f"https://api.spoonacular.com/recipes/findByIngredients?apiKey={api_key}&ingredients={','.join(ingredients)}&number=5&ranking=2")
         responseJSON = response.json()
+        if (responseJSON == []):
+            print ("invalid input")
+            ControlFrame.instructLabel.config(text = "invalid input!!!!!!!, please try again.", fg = "red", font = "helvetica 25 bold")
+            
+        #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
+
+
+
+            
         #create list of recipe items
         ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON]
         #add recipies to GUI
@@ -137,7 +146,7 @@ class RecipeFrame(Frame):
             end = RecipeFrame.RecipeSum.index(f"1.0+{word_found.end()+len(recipe.title) + 2 - (i+1)*7} chars")
             RecipeFrame.RecipeSum.tag_add('bold', start, end)
             i += 1
-        RecipeFrame.RecipeSum.tag_configure("bold", font='Helvetica 12 bold')
+        RecipeFrame.RecipeSum.tag_configure("bold", font='Helvetica 14 bold')
         
 
 
