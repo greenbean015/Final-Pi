@@ -81,7 +81,7 @@ class RecipeFrame(Frame):
         RecipeFrame.instructLabel = Label(self, text = "Recipes")
         RecipeFrame.instructLabel.pack(side=BOTTOM)
 
-        RecipeFrame.RecipeSum = Text(self, state=DISABLED, wrap=WORD, font='helvetica')
+        RecipeFrame.RecipeSum = Text(self, state=DISABLED, wrap=WORD, font='helvetica', height=10, width=50)
         RecipeFrame.RecipeSum.pack(side=RIGHT, fill = BOTH)
 
         RecipeFrame.imgLabel = Label(self)
@@ -162,10 +162,9 @@ HEIGHT = 480
 # create the window
 window = Tk()
 window.title("Recipies")
-#window.geometry(f"{WIDTH}x{HEIGHT}")
-window.maxsize(WIDTH, HEIGHT)
+window.geometry(f"{WIDTH}x{HEIGHT}")
+window.minsize(WIDTH, HEIGHT)
 #window.maxsize(WIDTH, HEIGHT)
-
 # create the controls GUI as a Tkinter Frame inside the window
 cFrame = ControlFrame(window)
 cFrame.setupGUI()
