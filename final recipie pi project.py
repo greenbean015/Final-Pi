@@ -44,6 +44,9 @@ class ControlFrame(Frame):
         if (responseJSON == []):
             print ("invalid input")
             ControlFrame.instructLabel.config(text = "invalid input!!!!!!!, please try again.", fg = "red", font = "helvetica 25 bold")
+
+        else:
+            ControlFrame.instructLabel.config(text = "What Ingredients do you have?", fg = "black", font = "helvetica 22 bold")
             
         #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
 
