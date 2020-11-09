@@ -27,7 +27,7 @@ class ControlFrame(Frame):
         ControlFrame.player_input = Entry(self, bg="white", font="helvetica 16")
         #functin that will process input from user
         ControlFrame.player_input.bind("<Return>", self.process)  
-        ControlFrame.player_input.pack(side=BOTTOM, fill=X)
+        ControlFrame.player_input.pack(side=TOP, fill=X)
         ControlFrame.player_input.focus()
         
     def process(self, event):
@@ -43,15 +43,12 @@ class ControlFrame(Frame):
         responseJSON = response.json()
         if (responseJSON == []):
             print ("invalid input")
-            ControlFrame.instructLabel.config(text = "invalid input!!!!!!!, please try again.", fg = "red", font = "helvetica 25 bold")
+            ControlFrame.instructLabel.config(text = "invalid input!!!!!!!, please try again.", fg = "red", font = "helvetica 22 bold")
 
         else:
             ControlFrame.instructLabel.config(text = "What Ingredients do you have?", fg = "black", font = "helvetica 22 bold")
             
         #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
-
-
-
             
         #create list of recipe items
         ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON]
@@ -81,10 +78,10 @@ class RecipeFrame(Frame):
         RecipeFrame.instructLabel = Label(self, text = "Recipes")
         RecipeFrame.instructLabel.pack(side=BOTTOM)
 
-        RecipeFrame.RecipeSum = Text(self, state=DISABLED, wrap=WORD, font='helvetica', height=10, width=50)
+        RecipeFrame.RecipeSum = Text(self, state=DISABLED, wrap=WORD, font='helvetica' , height=9, width=40)
         RecipeFrame.RecipeSum.pack(side=RIGHT, fill = BOTH)
 
-        RecipeFrame.imgLabel = Label(self)
+        RecipeFrame.imgLabel = Label(self, height=0, width=0)
         RecipeFrame.imgLabel.pack(anchor=NW, fill=BOTH)
 
         # setup scroll bar
@@ -132,14 +129,17 @@ class RecipeFrame(Frame):
                 RecipeFrame.formatSummary(self, ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]])
             #check if recipe already has the image downloaded
             if (hasattr(ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]], "photo")):
-                RecipeFrame.imgLabel.config(image=ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo)
+                Rphoto = ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo
+                RecipeFrame.imgLabel.config(image=Rphoto, height=Rphoto.height(), width=Rphoto.width())
+                #RecipeFrame.RecipeSum.config(width=int((800 - Rphoto.width())/12.08))
             else:
                 response = requests.get(recipe.img)
                 image = Image.open(BytesIO(response.content))
                 photo = ImageTk.PhotoImage(image)
                 # save photo to og recipe object
                 ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo = photo
-                RecipeFrame.imgLabel.config(image=photo)
+                RecipeFrame.imgLabel.config(image=photo, height=photo.height(), width=photo.width())
+                #RecipeFrame.RecipeSum.config(width=int((800 - photo.width())/12.08))
 
     def formatSummary(self, recipe):
         word_concord=re.finditer(r"<b>(.+?)<\/b>",recipe.summary)
