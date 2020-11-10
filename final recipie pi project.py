@@ -39,8 +39,10 @@ class ControlFrame(Frame):
 
         #If you put peanut butter it our program counts peanut and butter as two different ingredients
         ingredients = action.split()
-        response = requests.get(f"https://api.spoonacular.com/recipes/findByIngredients?apiKey={api_key}&ingredients={','.join(ingredients)}&number=5&ranking=2")
+        response = requests.get(f"https://api.spoonacular.com/recipes/complexSearch?apiKey={api_key}&includeIngredients={','.join(ingredients)}&number=2&fillIngredients=true&addRecipeInformation=true")
         responseJSON = response.json()
+        #this is probably wrong now
+        print(responseJSON)
         if (responseJSON == []):
             print ("invalid input")
             ControlFrame.instructLabel.config(text = "invalid input!!!!!!!, please try again.", fg = "red", font = "helvetica 22 bold")
@@ -51,7 +53,7 @@ class ControlFrame(Frame):
         #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
             
         #create list of recipe items
-        ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON]
+        ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON["results"]]
         #add recipies to GUI
         for recipe in ControlFrame.Recipies:
             rFrame.addRecipe(recipe)
@@ -78,7 +80,7 @@ class RecipeFrame(Frame):
         RecipeFrame.instructLabel = Label(self, text = "Recipes")
         RecipeFrame.instructLabel.pack(side=BOTTOM)
 
-        RecipeFrame.RecipeSum = Text(self, state=DISABLED, wrap=WORD, font='helvetica' , height=9, width=40)
+        RecipeFrame.RecipeSum = Text(self, state=DISABLED, wrap=WORD, font='helvetica' , height=10, width=50)
         RecipeFrame.RecipeSum.pack(side=RIGHT, fill = BOTH)
 
         RecipeFrame.imgLabel = Label(self, height=0, width=0)
@@ -107,27 +109,29 @@ class RecipeFrame(Frame):
             #make textbox editable
             RecipeFrame.RecipeSum.config(state=NORMAL)
             #so we don't get more informaiton ona recipe more than once
-            if (hasattr(recipe, "summary")):
-                #clear textbox
-                RecipeFrame.RecipeSum.delete("1.0", END)
-                cleanSum = recipe.summary.replace("<b>", "").replace("</b>", "")
-                RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{cleanSum}")
-                RecipeFrame.formatSummary(self, recipe)
-            else:
-                response = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/information?apiKey={api_key}")
-                responseJSON = response.json()
-                #clear textbox
-                RecipeFrame.RecipeSum.delete("1.0", END)
-                #convert response to JSON object
-                sumarry = responseJSON["summary"]
-                #remove similar recipies, maybe we can do something with them
-                sumarry = sumarry[0:sumarry.rfind("Try <a href=")]
-                ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].summary = sumarry
-                cleanSum = sumarry.replace("<b>", "").replace("</b>", "")
-                RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{cleanSum}")
-                # Gives the summary box bold text
-                RecipeFrame.formatSummary(self, ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]])
-            #check if recipe already has the image downloaded
+            #if (hasattr(recipe, "summary")):
+                ##clear textbox
+                #RecipeFrame.RecipeSum.delete("1.0", END)
+                #cleanSum = recipe.summary.replace("<b>", "").replace("</b>", "")
+                #RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{cleanSum}")
+                #RecipeFrame.formatSummary(self, recipe)
+            #else:
+                #response = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/information?apiKey={api_key}")
+                #responseJSON = response.json()
+                ##clear textbox
+                #RecipeFrame.RecipeSum.delete("1.0", END)
+                ##convert response to JSON object
+                #sumarry = responseJSON["summary"]
+                ##remove similar recipies, maybe we can do something with them
+                #sumarry = sumarry[0:sumarry.rfind("Try <a href=")]
+                #ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].summary = sumarry
+                #cleanSum = sumarry.replace("<b>", "").replace("</b>", "")
+                #RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{cleanSum}")
+                ## Gives the summary box bold text
+                #RecipeFrame.formatSummary(self, ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]])
+                
+            ##check if recipe already has the image downloaded
+            #set image to image thing and image with the image with and image
             if (hasattr(ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]], "photo")):
                 Rphoto = ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo
                 RecipeFrame.imgLabel.config(image=Rphoto, height=Rphoto.height(), width=Rphoto.width())
@@ -139,7 +143,6 @@ class RecipeFrame(Frame):
                 # save photo to og recipe object
                 ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo = photo
                 RecipeFrame.imgLabel.config(image=photo, height=photo.height(), width=photo.width())
-                #RecipeFrame.RecipeSum.config(width=int((800 - photo.width())/12.08))
 
     def formatSummary(self, recipe):
         word_concord=re.finditer(r"<b>(.+?)<\/b>",recipe.summary)
