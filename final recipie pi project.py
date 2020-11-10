@@ -16,19 +16,21 @@ class ControlFrame(Frame):
 
 # sets up the GUI
     def setupGUI(self):
-        # Makes the frame the size of the window
-        self.pack(side=TOP, expand=1, fill=BOTH)
-        
         #Create label that tells the user that to put in textbox
-        ControlFrame.instructLabel = Label(self, text = "What Ingredients do you have?", font="helvetica 22 bold")
+        ControlFrame.instructLabel = Label(window, text = "What Ingredients do you have?", font="helvetica 18 bold")
         ControlFrame.instructLabel.pack(anchor=N)
         
         #Creates the Textbox
-        ControlFrame.player_input = Entry(self, bg="white", font="helvetica 16")
+        ControlFrame.player_input = Entry(window, bg="white", font="helvetica 16")
         #functin that will process input from user
         ControlFrame.player_input.bind("<Return>", self.process)  
         ControlFrame.player_input.pack(side=TOP, fill=X)
         ControlFrame.player_input.focus()
+        # Makes the frame the size of the window
+        self.pack(side=TOP, expand=1, fill=BOTH)
+
+        ControlFrame.resultAmount = Entry(self, bg="white", font="helvetica 16", width=8)
+        ControlFrame.resultAmount.pack(anchor=S)
         
     def process(self, event):
         #resets the recepie list when one a word is entered
@@ -41,16 +43,15 @@ class ControlFrame(Frame):
         ingredients = action.split()
         response = requests.get(f"https://api.spoonacular.com/recipes/complexSearch?apiKey={api_key}&includeIngredients={','.join(ingredients)}&number=2&fillIngredients=true&addRecipeInformation=true")
         responseJSON = response.json()
+        #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
         #this is probably wrong now
         print(responseJSON)
         if (responseJSON == []):
             print ("invalid input")
-            ControlFrame.instructLabel.config(text = "invalid input!!!!!!!, please try again.", fg = "red", font = "helvetica 22 bold")
+            ControlFrame.instructLabel.config(text = "invalid input!!!!!!!, please try again.", fg = "red", font = "helvetica 18 bold")
 
         else:
-            ControlFrame.instructLabel.config(text = "What Ingredients do you have?", fg = "black", font = "helvetica 22 bold")
-            
-        #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
+            ControlFrame.instructLabel.config(text = "What Ingredients do you have?", fg = "black", font = "helvetica 18 bold")
             
         #create list of recipe items
         ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON["results"]]
@@ -80,11 +81,11 @@ class RecipeFrame(Frame):
         RecipeFrame.instructLabel = Label(self, text = "Recipes")
         RecipeFrame.instructLabel.pack(side=BOTTOM)
 
-        RecipeFrame.RecipeSum = Text(self, state=DISABLED, wrap=WORD, font='helvetica' , height=10, width=50)
-        RecipeFrame.RecipeSum.pack(side=RIGHT, fill = BOTH)
+        RecipeFrame.RecipeSum = Text(self, state=DISABLED, wrap=WORD, font='helvetica' , height=10, width=40)
+        #RecipeFrame.RecipeSum.pack(side=RIGHT, fill = BOTH, expand=1)
 
         RecipeFrame.imgLabel = Label(self, height=0, width=0)
-        RecipeFrame.imgLabel.pack(anchor=NW, fill=BOTH)
+        #RecipeFrame.imgLabel.pack(anchor=NW, fill=BOTH)
 
         # setup scroll bar
         RecipeFrame.scroll = Scrollbar(window)
@@ -105,7 +106,12 @@ class RecipeFrame(Frame):
         if (RecipeFrame.myList.curselection()):
             # maybe save RecipeFrame.myList.curselection()[0] so we can ensure we work on the same is the prboem of making another varible that big
             recipe = ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]]
-            #TODO Check if this recipe is already displayed
+            # delete controls and add recipie image widget and textbox
+            cFrame.pack_forget()
+            RecipeFrame.RecipeSum.pack(side=RIGHT, fill = BOTH, expand=1)
+            RecipeFrame.imgLabel.pack(anchor=NW, fill=BOTH)
+            #TODO Check if this recipe is already displayed eh i don't think it really matters
+
             #make textbox editable
             RecipeFrame.RecipeSum.config(state=NORMAL)
             #so we don't get more informaiton ona recipe more than once
@@ -143,6 +149,7 @@ class RecipeFrame(Frame):
                 # save photo to og recipe object
                 ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo = photo
                 RecipeFrame.imgLabel.config(image=photo, height=photo.height(), width=photo.width())
+                #RecipeFrame.RecipeSum.pack(side=RIGHT, fill = BOTH, expand=1)
 
     def formatSummary(self, recipe):
         word_concord=re.finditer(r"<b>(.+?)<\/b>",recipe.summary)
