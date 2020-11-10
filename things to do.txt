@@ -1,0 +1,19 @@
+get a GUI that gets basic options from the user
+possibley show the user the missing ingredients
+get rid of random links in some of the recipies descriptions
+add more comments to code
+
+possibley remove summar box to fit the recipie steps
+possibley add the actual recipie steps
+https://spoonacular.com/food-api/docs#Get-Analyzed-Recipe-Instructions
+
+
+
+
+
+###########################
+things to say during presentation go here:
+what are the goals, how it works, why is it relevant?
+
+
+talk about futre development plans and lessons learned?
