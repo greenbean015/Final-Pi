@@ -45,7 +45,7 @@ class ControlFrame(Frame):
         responseJSON = response.json()
         #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
         #this is probably wrong now
-        print(responseJSON)
+        #print(responseJSON)
         if (responseJSON == []):
             print ("invalid input")
             ControlFrame.instructLabel.config(text = "invalid input!!!!!!!, please try again.", fg = "red", font = "helvetica 18 bold")
@@ -114,6 +114,22 @@ class RecipeFrame(Frame):
 
             #make textbox editable
             RecipeFrame.RecipeSum.config(state=NORMAL)
+            #looks at all the ingredients and subtracs the one you entered and gives you the missing ingredienants
+            missingIngrediants = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/ingredientWidget.json?apiKey={api_key}")
+            missingJSON = missingIngrediants.json()
+            ingredientsmis = missingJSON['ingredients']
+            #print (ingredientsmis)
+            misname = []
+            for misingredients in ingredientsmis:
+                #print (misingredients['name'])
+                have = ControlFrame.player_input.get().lower()
+                misname.append(misingredients['name'])
+                    
+
+                
+
+            misname.remove(have)
+            print(misname)
             #so we don't get more informaiton ona recipe more than once
             #if (hasattr(recipe, "summary")):
                 ##clear textbox
