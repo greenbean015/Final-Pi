@@ -39,7 +39,7 @@ class ControlFrame(Frame):
 
         #If you put peanut butter it our program counts peanut and butter as two different ingredients
         ingredients = action.split()
-        response = requests.get(f"https://api.spoonacular.com/recipes/findByIngredients?apiKey={api_key}&ingredients={','.join(ingredients)}&number=5&ranking=2")
+        response = requests.get(f"https://api.spoonacular.com/recipes/complexSearch?apiKey={api_key}&includeIngredients={','.join(ingredients)}&number=2&fillIngredients=true&addRecipeInformation=true")
         responseJSON = response.json()
 <<<<<<< HEAD
         #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
