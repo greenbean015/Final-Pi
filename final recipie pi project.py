@@ -41,12 +41,8 @@ class ControlFrame(Frame):
         ingredients = action.split()
         response = requests.get(f"https://api.spoonacular.com/recipes/complexSearch?apiKey={api_key}&includeIngredients={','.join(ingredients)}&number=2&fillIngredients=true&addRecipeInformation=true")
         responseJSON = response.json()
-<<<<<<< HEAD
-        #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
-=======
         #this is probably wrong now
-        print(responseJSON)
->>>>>>> cce8c2c21b563cbe4be176a803ce3b9d8d9704d0
+        #print(responseJSON)
         if (responseJSON == []):
             print ("invalid input")
             ControlFrame.instructLabel.config(text = "invalid input!!!!!!!, please try again.", fg = "red", font = "helvetica 22 bold")
@@ -54,7 +50,7 @@ class ControlFrame(Frame):
         else:
             ControlFrame.instructLabel.config(text = "What Ingredients do you have?", fg = "black", font = "helvetica 22 bold")
             
-        
+        #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
             
         #create list of recipe items
         ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON["results"]]
@@ -112,52 +108,23 @@ class RecipeFrame(Frame):
             #TODO Check if this recipe is already displayed
             #make textbox editable
             RecipeFrame.RecipeSum.config(state=NORMAL)
-            #so we don't get more informaiton ona recipe more than once
-<<<<<<< HEAD
-            if (hasattr(recipe, "summary")):
-                #clear textbox
-                RecipeFrame.RecipeSum.delete("1.0", END)
-                cleanSum = recipe.summary.replace("<b>", "").replace("</b>", "")
-                RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{cleanSum}")
-                RecipeFrame.formatSummary(self, recipe)
-            else:
-                response = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/information?apiKey={api_key}")
-                responseJSON = response.json()
-                #clear textbox
-                RecipeFrame.RecipeSum.delete("1.0", END)
-                #convert response to JSON object
-                sumarry = responseJSON["summary"]
-                #remove similar recipies, maybe we can do something with them
-                sumarry = sumarry[0:sumarry.rfind("Try <a href=")]
-                ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].summary = sumarry
-                cleanSum = sumarry.replace("<b>", "").replace("</b>", "")
-                RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{cleanSum}")
-                # Gives the summary box bold text
-                RecipeFrame.formatSummary(self, ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]])
-
-                
-                #looks at all the ingredients and subtracs the one you entered and gives you the missing ingredienants
-                missingIngrediants = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/ingredientWidget.json?apiKey={api_key}")
-                missingJSON = missingIngrediants.json()
-                ingredientsmis = missingJSON['ingredients']
-                print (ingredientsmis)
-                misname = []
-                for misingredients in ingredientsmis:
-                    print (misingredients['name'])
-                    have = ControlFrame.player_input.get().lower()
-                    misname.append(misingredients['name'])
+            #looks at all the ingredients and subtracs the one you entered and gives you the missing ingredienants
+            missingIngrediants = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/ingredientWidget.json?apiKey={api_key}")
+            missingJSON = missingIngrediants.json()
+            ingredientsmis = missingJSON['ingredients']
+            #print (ingredientsmis)
+            misname = []
+            for misingredients in ingredientsmis:
+                #print (misingredients['name'])
+                have = ControlFrame.player_input.get().lower()
+                misname.append(misingredients['name'])
                     
 
                 
 
-                misname.remove(have)
-                print(misname)
-
-                
-
-
-            #check if recipe already has the image downloaded
-=======
+            misname.remove(have)
+            print(misname)
+            #so we don't get more informaiton ona recipe more than once
             #if (hasattr(recipe, "summary")):
                 ##clear textbox
                 #RecipeFrame.RecipeSum.delete("1.0", END)
@@ -181,7 +148,6 @@ class RecipeFrame(Frame):
                 
             ##check if recipe already has the image downloaded
             #set image to image thing and image with the image with and image
->>>>>>> cce8c2c21b563cbe4be176a803ce3b9d8d9704d0
             if (hasattr(ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]], "photo")):
                 Rphoto = ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo
                 RecipeFrame.imgLabel.config(image=Rphoto, height=Rphoto.height(), width=Rphoto.width())
@@ -195,7 +161,6 @@ class RecipeFrame(Frame):
                 RecipeFrame.imgLabel.config(image=photo, height=photo.height(), width=photo.width())
 
     def formatSummary(self, recipe):
-        #finds charaters from html and removees them
         word_concord=re.finditer(r"<b>(.+?)<\/b>",recipe.summary)
         i = 0
         for word_found in word_concord:
@@ -204,31 +169,6 @@ class RecipeFrame(Frame):
             RecipeFrame.RecipeSum.tag_add('bold', start, end)
             i += 1
         RecipeFrame.RecipeSum.tag_configure("bold", font='Helvetica 14 bold')
-
-
-    def Missing(self):
-        #looks at all the ingredients and subtracs the one you entered and gives you the missing ingredienants
-            missingIngrediants = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/ingredientWidget.json?apiKey={api_key}")
-            missingJSON = missingIngrediants.json()
-            ingredientsmis = missingJSON['ingredients']
-            misname = []
-            for misingredients in ingredientsmis:
-                if ( ControlFrame.player_input.get().lower() == misingredients['name']):
-                    break
-
-                else:
-                    misname.append(misingredients['name'])
-                    
-
-            if (misname[0] == misname[1]):
-                del misname[0]
-
-
-            print(misname)
-
-
-
-    
         
 
 
