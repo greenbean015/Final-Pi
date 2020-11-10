@@ -41,6 +41,7 @@ class ControlFrame(Frame):
         ingredients = action.split()
         response = requests.get(f"https://api.spoonacular.com/recipes/findByIngredients?apiKey={api_key}&ingredients={','.join(ingredients)}&number=5&ranking=2")
         responseJSON = response.json()
+        #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
         if (responseJSON == []):
             print ("invalid input")
             ControlFrame.instructLabel.config(text = "invalid input!!!!!!!, please try again.", fg = "red", font = "helvetica 22 bold")
@@ -48,7 +49,7 @@ class ControlFrame(Frame):
         else:
             ControlFrame.instructLabel.config(text = "What Ingredients do you have?", fg = "black", font = "helvetica 22 bold")
             
-        #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
+        
             
         #create list of recipe items
         ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON]
@@ -127,6 +128,28 @@ class RecipeFrame(Frame):
                 RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{cleanSum}")
                 # Gives the summary box bold text
                 RecipeFrame.formatSummary(self, ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]])
+
+                
+                #looks at all the ingredients and subtracs the one you entered and gives you the missing ingredienants
+                missingIngrediants = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/ingredientWidget.json?apiKey={api_key}")
+                missingJSON = missingIngrediants.json()
+                ingredientsmis = missingJSON['ingredients']
+                print (ingredientsmis)
+                misname = []
+                for misingredients in ingredientsmis:
+                    print (misingredients['name'])
+                    have = ControlFrame.player_input.get().lower()
+                    misname.append(misingredients['name'])
+                    
+
+                
+
+                misname.remove(have)
+                print(misname)
+
+                
+
+
             #check if recipe already has the image downloaded
             if (hasattr(ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]], "photo")):
                 Rphoto = ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo
@@ -142,6 +165,7 @@ class RecipeFrame(Frame):
                 #RecipeFrame.RecipeSum.config(width=int((800 - photo.width())/12.08))
 
     def formatSummary(self, recipe):
+        #finds charaters from html and removees them
         word_concord=re.finditer(r"<b>(.+?)<\/b>",recipe.summary)
         i = 0
         for word_found in word_concord:
@@ -150,6 +174,31 @@ class RecipeFrame(Frame):
             RecipeFrame.RecipeSum.tag_add('bold', start, end)
             i += 1
         RecipeFrame.RecipeSum.tag_configure("bold", font='Helvetica 14 bold')
+
+
+    def Missing(self):
+        #looks at all the ingredients and subtracs the one you entered and gives you the missing ingredienants
+            missingIngrediants = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/ingredientWidget.json?apiKey={api_key}")
+            missingJSON = missingIngrediants.json()
+            ingredientsmis = missingJSON['ingredients']
+            misname = []
+            for misingredients in ingredientsmis:
+                if ( ControlFrame.player_input.get().lower() == misingredients['name']):
+                    break
+
+                else:
+                    misname.append(misingredients['name'])
+                    
+
+            if (misname[0] == misname[1]):
+                del misname[0]
+
+
+            print(misname)
+
+
+
+    
         
 
 
