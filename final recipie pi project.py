@@ -200,7 +200,7 @@ class RecipeFrame(Frame):
             linenumber = 3.0
             stepnumber = 1
             listinc = 0
-           
+           #adds steps to the desc box 
             for i in steplist:
                 RecipeFrame.RecipeSum.insert(f"{linenumber}",f"Step {stepnumber}: {steplist[listinc]} \n\n")
                 
