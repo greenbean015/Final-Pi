@@ -138,6 +138,8 @@ class RecipeFrame(Frame):
 
             #make textbox editable
             RecipeFrame.RecipeSum.config(state=NORMAL)
+            #clear textbox
+            RecipeFrame.RecipeSum.delete("1.0", END)
             #so we don't get more informaiton ona recipe more than once
             #if (hasattr(recipe, "summary")):
                 ##clear textbox
@@ -173,7 +175,8 @@ class RecipeFrame(Frame):
                 # save photo to og recipe object
                 ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo = photo
                 RecipeFrame.imgLabel.config(image=photo)
-            #RecipeFrame.RecipeSum.insert()
+            ingredients = ", ".join(recipe.missIng)
+            RecipeFrame.RecipeSum.insert("1.0", f"Missing Ingredients: {ingredients}")
             RecipeFrame.RecipeSum.config(state=DISABLED)
             
 
