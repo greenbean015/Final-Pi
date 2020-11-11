@@ -48,9 +48,9 @@ class ControlFrame(Frame):
         responseJSON = response.json()
         #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
         #this is probably wrong now
-        print(responseJSON)
+        #print(responseJSON)
         if (responseJSON == []):
-            ControlFrame.instructLabel.config(text = "No results", fg = "red", font = "helvetica 18 bold")
+            ControlFrame.instructLabel.config(text = "No results or invalid input", fg = "red", font = "helvetica 18 bold")
 
         else:
             ControlFrame.instructLabel.config(text = "What Ingredients do you have?", fg = "black", font = "helvetica 18 bold")
@@ -140,6 +140,16 @@ class RecipeFrame(Frame):
             RecipeFrame.RecipeSum.config(state=NORMAL)
             #clear textbox
             RecipeFrame.RecipeSum.delete("1.0", END)
+            instruct = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/analyzedInstructions?apiKey={api_key}")
+            instructions =  instruct.json()
+            steplist = []
+            for ins in instructions:
+               instuctionlist = ins['steps']
+               for steps in instuctionlist:
+                steplist.append(steps['step'])
+
+
+            #print (steplist)
             #so we don't get more informaiton ona recipe more than once
             #if (hasattr(recipe, "summary")):
                 ##clear textbox
@@ -177,6 +187,11 @@ class RecipeFrame(Frame):
                 RecipeFrame.imgLabel.config(image=photo)
             ingredients = ", ".join(recipe.missIng)
             RecipeFrame.RecipeSum.insert("1.0", f"Missing Ingredients: {ingredients}")
+            
+
+            recstep = ", ".join(steplist)
+            print (recstep)
+            RecipeFrame.RecipeSum.insert("2.0", f"\nSteps: {recstep}")
             RecipeFrame.RecipeSum.config(state=DISABLED)
             
 
