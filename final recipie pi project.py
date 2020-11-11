@@ -35,14 +35,6 @@ class ControlFrame(Frame):
         ControlFrame.resultAmnt.insert(0, "5")
         ControlFrame.resultAmnt.grid(column=1, row=0)
 
-    def sortRecipies(self):
-        sortVals = []
-        if (RecipeFrame.Sort == "Likes"):
-            for recipie in ControlFrame.Recipies:
-                sortVals.append(int(recipie.likes))
-                sortVals.sort(reverse=1)
-        print(RecipeFrame.Sort.get())
-
         
     def process(self, event):
         #resets the recepie list when one a word is entered
@@ -56,7 +48,6 @@ class ControlFrame(Frame):
         response = requests.get(f"https://api.spoonacular.com/recipes/findByIngredients?apiKey={api_key}&ingredients={','.join(ingredients)}&number={ControlFrame.resultAmnt.get()}")
         responseJSON = response.json()
         #if responsejson is an empy string(ex. no response) then chage the text of the instruction lable
-        #this is probably wrong now
         #print(responseJSON)
         if (responseJSON == []):
             ControlFrame.instructLabel.config(text = "No results or invalid input", fg = "red", font = "helvetica 18 bold")
@@ -69,6 +60,7 @@ class ControlFrame(Frame):
         #add recipies to list
         for recipie in ControlFrame.Recipies:
             RecipeFrame.addRecipe(self, recipie)
+        rFrame.sortRecipies()
 
 class Recipe():
     def __init__(self, recipeJSON):
@@ -77,35 +69,53 @@ class Recipe():
         self.img = recipeJSON["image"]
         self.likes = recipeJSON["likes"]
         self.ingUsedCnt = recipeJSON["usedIngredientCount"]
-        self.ingMissCnt = recipeJSON["missedIngredientCount"]
-        self.missIng = [ing["name"] for ing in recipeJSON["missedIngredients"]]
+        self.missIng = []
+        i = 0
+        for ing in recipeJSON["missedIngredients"]:
+            if (ing["name"] not in self.missIng):
+                self.missIng.append(ing["name"])
+            else:
+                i+=1
+        self.ingMissCnt = recipeJSON["missedIngredientCount"] - i
 
     def __str__(self):
         return self.title
+
+
 
 class RecipeFrame(Frame):
     def __init__(self, parent):
         # call the constructor in the superclass
         Frame.__init__(self, parent)
 
+    def showOptions(self):
+        rFrame.pack_forget()
+        cFrame.pack(side=TOP, expand=1, fill=BOTH)
+        RecipeFrame.dumbFrame.pack_forget()
+        RecipeFrame.dumbFrame.pack(side=TOP, fill=X)
+        RecipeFrame.OptionBut.pack_forget()
+
+
     def setupGUI(self):
         self.pack(side=TOP, expand=1, fill=BOTH)
 
-        dumbFrame = Frame(window)
-        dumbFrame.pack(side=TOP, fill=X)
+        RecipeFrame.dumbFrame = Frame(window)
+        RecipeFrame.dumbFrame.pack(side=TOP, fill=X)
 
-        RecipeFrame.instructLabel = Label(dumbFrame, text = "Sort by:", font="helvetica 10")
+        RecipeFrame.instructLabel = Label(RecipeFrame.dumbFrame, text = "Sort by:", font="helvetica 10")
         #RecipeFrame.instructLabel.grid(row=0, column=2)
         RecipeFrame.instructLabel.pack(side=LEFT, pady=6)
 
-        RecipeFrame.Sort = StringVar(dumbFrame)
-        RecipeFrame.SortList = OptionMenu(dumbFrame, RecipeFrame.Sort, "Likes", "Used Ingredients", "Missing Ingredients")#, command=rFrame.sortRecipies())
+        RecipeFrame.Sort = StringVar(RecipeFrame.dumbFrame)
+        RecipeFrame.SortList = OptionMenu(RecipeFrame.dumbFrame, RecipeFrame.Sort, "Likes", "Used Ingredients", "Missing Ingredients")#, command=rFrame.sortRecipies())
         RecipeFrame.Sort.set("Likes")
-        RecipeFrame.Sort.trace_add("write", cFrame.sortRecipies())
+        RecipeFrame.Sort.trace_add("write", lambda *args: rFrame.sortRecipies())
         #RecipeFrame.SortList.grid(row=0, column=3)
         RecipeFrame.SortList.pack(side=LEFT, fill=X)
 
-        RecipeFrame.instructLabel = Label(dumbFrame, text = "Recipes", font="helvetica 10 bold")
+        RecipeFrame.OptionBut = Button(RecipeFrame.dumbFrame, text="Options", command=rFrame.showOptions)
+        
+        RecipeFrame.instructLabel = Label(RecipeFrame.dumbFrame, text = "Recipes", font="helvetica 10 bold")
         #RecipeFrame.instructLabel.grid(row=0, column=4, ipadx=240)
         #RecipeFrame.instructLabel.pack(fill=X,side=LEFT, ipadx=240)
         
@@ -130,17 +140,37 @@ class RecipeFrame(Frame):
     def addRecipe(self, Recipe):
         RecipeFrame.myList.insert(END, f"{Recipe.title}  |  Likes: {Recipe.likes}  |  Missing Ingredients: {Recipe.ingMissCnt}")
 
+    def sortRecipies(self):
+        sortVals = []
+        if (RecipeFrame.Sort.get() == "Likes"):
+            for recipie in ControlFrame.Recipies:
+                sortVals.append(recipie.likes)
+                sortVals.sort(reverse=1)
+        if (RecipeFrame.Sort.get() == "Used Ingredients"):
+            pass
+        if (RecipeFrame.Sort.get() == "Missing Ingredients"):
+            pass
+        #ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON]
+        print(sortVals)
+
     def expandRecipe(self, event):
         #makes this only run if an item is selected
         if (RecipeFrame.myList.curselection()):
             # maybe save RecipeFrame.myList.curselection()[0] so we can ensure we work on the same is the prboem of making another varible that big
             recipe = ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]]
-            # delete controls and add recipie image widget and textbox
+            # delete controls
             cFrame.pack_forget()
-
+            # add option button
+            rFrame.OptionBut.pack(side=RIGHT, padx=5)
+            #repack the recipie frame
+            rFrame.pack(side=TOP, expand=1, fill=BOTH)
+            
             RecipeFrame.RecipeSum.pack(anchor = N, side=RIGHT, fill = BOTH, expand=1)
             RecipeFrame.imgLabel.pack(anchor = NW, fill=BOTH, side=TOP)
-            #TODO Check if this recipe is already displayed eh i don't think it really matters
+            RecipeFrame.dumbFrame.pack_forget()
+            RecipeFrame.dumbFrame.pack(side=TOP, fill=BOTH, expand=1)
+            RecipeFrame.myList.pack_forget()
+            RecipeFrame.myList.pack(side=BOTTOM, expand=1, fill=BOTH)
 
             #make textbox editable
             RecipeFrame.RecipeSum.config(state=NORMAL)
@@ -150,10 +180,9 @@ class RecipeFrame(Frame):
             instructions =  instruct.json()
             steplist = []
             for ins in instructions:
-               instuctionlist = ins['steps']
-               for steps in instuctionlist:
-                steplist.append(steps['step'])
-
+                instuctionlist = ins['steps']
+                for steps in instuctionlist:
+                    steplist.append(steps['step'])
 
             #print (steplist)
             #so we don't get more informaiton ona recipe more than once
@@ -191,14 +220,16 @@ class RecipeFrame(Frame):
                 # save photo to og recipe object-
                 ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo = photo
                 RecipeFrame.imgLabel.config(image=photo)
-            ingredients = ", ".join(recipe.missIng)
-            RecipeFrame.RecipeSum.insert("1.0", f"Missing Ingredients: {ingredients}")
-            
 
-            recstep = ", ".join(steplist)
-            print (recstep)
-            RecipeFrame.RecipeSum.insert("2.0", f"\nSteps: {recstep}")
-            RecipeFrame.RecipeSum.config(state=DISABLED)
+            if (len(recipe.missIng) > 0):
+                ingredients = ", ".join(recipe.missIng)
+                RecipeFrame.RecipeSum.insert("1.0", f"Missing Ingredients: {ingredients}\n")
+            
+            if (len(steplist) > 0):
+                recstep = ", ".join(steplist)
+                #print (recstep)
+                RecipeFrame.RecipeSum.insert(END, f"Steps: {recstep}")
+                RecipeFrame.RecipeSum.config(state=DISABLED)
             
     def formatSummary(self, recipe):
         word_concord=re.finditer(r"<b>(.+?)<\/b>",recipe.summary)
