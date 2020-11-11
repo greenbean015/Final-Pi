@@ -40,7 +40,7 @@ class ControlFrame(Frame):
         RecipeFrame.myList.delete(0, END)
         #take the input from the input line and sets them all to lower case
         action = ControlFrame.player_input.get().lower()
-        response = "invalid input try again"
+        response = "yes"
 
         #If you put peanut butter it our program counts peanut and butter as two different ingredients
         ingredients = action.split()
