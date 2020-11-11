@@ -220,16 +220,26 @@ class RecipeFrame(Frame):
                 # save photo to og recipe object-
                 ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo = photo
                 RecipeFrame.imgLabel.config(image=photo)
-
-            if (len(recipe.missIng) > 0):
-                ingredients = ", ".join(recipe.missIng)
-                RecipeFrame.RecipeSum.insert("1.0", f"Missing Ingredients: {ingredients}\n")
+            #adds missing ingrediends to the desc box
+            ingredients = ", ".join(recipe.missIng)
+            RecipeFrame.RecipeSum.insert("1.0", f"Missing Ingredients: {ingredients} \n\n")
             
-            if (len(steplist) > 0):
-                recstep = ", ".join(steplist)
-                #print (recstep)
-                RecipeFrame.RecipeSum.insert(END, f"Steps: {recstep}")
-                RecipeFrame.RecipeSum.config(state=DISABLED)
+            #adds steps to the description box
+            #recstep = ", ".join(steplist)
+            linenumber = 3.0
+            stepnumber = 1
+            listinc = 0
+           #adds steps to the desc box 
+            for i in steplist:
+                RecipeFrame.RecipeSum.insert(f"{linenumber}",f"Step {stepnumber}: {steplist[listinc]} \n\n")
+                
+
+                linenumber += 2.0
+                stepnumber += 1
+                listinc +=1
+     
+            #RecipeFrame.RecipeSum.insert("2.0", f"\nSteps: {recstep}")
+            RecipeFrame.RecipeSum.config(state=DISABLED)
             
     def formatSummary(self, recipe):
         word_concord=re.finditer(r"<b>(.+?)<\/b>",recipe.summary)
