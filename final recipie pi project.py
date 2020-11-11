@@ -1,5 +1,6 @@
 from tkinter import *
 import re
+from typing import OrderedDict
 import requests
 import ImageTk
 from io import BytesIO
@@ -60,7 +61,6 @@ class ControlFrame(Frame):
         #add recipies to list
         for recipie in ControlFrame.Recipies:
             RecipeFrame.addRecipe(self, recipie)
-        rFrame.sortRecipies()
 
 class Recipe():
     def __init__(self, recipeJSON):
@@ -102,16 +102,16 @@ class RecipeFrame(Frame):
         RecipeFrame.dumbFrame = Frame(window)
         RecipeFrame.dumbFrame.pack(side=TOP, fill=X)
 
-        RecipeFrame.instructLabel = Label(RecipeFrame.dumbFrame, text = "Sort by:", font="helvetica 10")
+        RecipeFrame.instructLabel = Label(RecipeFrame.dumbFrame, text = "Recipes:", font="helvetica 10 bold")
         #RecipeFrame.instructLabel.grid(row=0, column=2)
         RecipeFrame.instructLabel.pack(side=LEFT, pady=6)
 
-        RecipeFrame.Sort = StringVar(RecipeFrame.dumbFrame)
-        RecipeFrame.SortList = OptionMenu(RecipeFrame.dumbFrame, RecipeFrame.Sort, "Likes", "Used Ingredients", "Missing Ingredients")#, command=rFrame.sortRecipies())
-        RecipeFrame.Sort.set("Likes")
-        RecipeFrame.Sort.trace_add("write", lambda *args: rFrame.sortRecipies())
+        #RecipeFrame.Sort = StringVar(RecipeFrame.dumbFrame)
+        #RecipeFrame.SortList = OptionMenu(RecipeFrame.dumbFrame, RecipeFrame.Sort, "Likes", "Used Ingredients", "Missing Ingredients")#, command=rFrame.sortRecipies())
+        #RecipeFrame.Sort.set("Likes")
+        #RecipeFrame.Sort.trace_add("write", lambda *args: rFrame.sortRecipies())
         #RecipeFrame.SortList.grid(row=0, column=3)
-        RecipeFrame.SortList.pack(side=LEFT, fill=X)
+        #RecipeFrame.SortList.pack(side=LEFT, fill=X)
 
         RecipeFrame.OptionBut = Button(RecipeFrame.dumbFrame, text="Options", command=rFrame.showOptions)
         
@@ -140,18 +140,6 @@ class RecipeFrame(Frame):
     def addRecipe(self, Recipe):
         RecipeFrame.myList.insert(END, f"{Recipe.title}  |  Likes: {Recipe.likes}  |  Missing Ingredients: {Recipe.ingMissCnt}")
 
-    def sortRecipies(self):
-        sortVals = []
-        if (RecipeFrame.Sort.get() == "Likes"):
-            for recipie in ControlFrame.Recipies:
-                sortVals.append(recipie.likes)
-                sortVals.sort(reverse=1)
-        if (RecipeFrame.Sort.get() == "Used Ingredients"):
-            pass
-        if (RecipeFrame.Sort.get() == "Missing Ingredients"):
-            pass
-        #ControlFrame.Recipies = [Recipe(recipeJSON) for recipeJSON in responseJSON]
-        print(sortVals)
 
     def expandRecipe(self, event):
         #makes this only run if an item is selected
@@ -183,29 +171,6 @@ class RecipeFrame(Frame):
                 instuctionlist = ins['steps']
                 for steps in instuctionlist:
                     steplist.append(steps['step'])
-
-            #print (steplist)
-            #so we don't get more informaiton ona recipe more than once
-            #if (hasattr(recipe, "summary")):
-                ##clear textbox
-                #RecipeFrame.RecipeSum.delete("1.0", END)
-                #cleanSum = recipe.summary.replace("<b>", "").replace("</b>", "")
-                #RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{cleanSum}")
-                #RecipeFrame.formatSummary(self, recipe)
-            #else:
-                #response = requests.get(f"https://api.spoonacular.com/recipes/{recipe.id}/information?apiKey={api_key}")
-                #responseJSON = response.json()
-                ##clear textbox
-                #RecipeFrame.RecipeSum.delete("1.0", END)
-                ##convert response to JSON object
-                #sumarry = responseJSON["summary"]
-                ##remove similar recipies, maybe we can do something with them
-                #sumarry = sumarry[0:sumarry.rfind("Try <a href=")]
-                #ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].summary = sumarry
-                #cleanSum = sumarry.replace("<b>", "").replace("</b>", "")
-                #RecipeFrame.RecipeSum.insert(END, f"{recipe.title}\n\n{cleanSum}")
-                ## Gives the summary box bold text
-                #RecipeFrame.formatSummary(self, ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]])
                 
             ##check if recipe already has the image downloaded
             #set image to image thing and image with the image with and image
@@ -221,8 +186,9 @@ class RecipeFrame(Frame):
                 ControlFrame.Recipies[RecipeFrame.myList.curselection()[0]].photo = photo
                 RecipeFrame.imgLabel.config(image=photo)
             #adds missing ingrediends to the desc box
-            ingredients = ", ".join(recipe.missIng)
-            RecipeFrame.RecipeSum.insert("1.0", f"Missing Ingredients: {ingredients} \n\n")
+            if (len(recipe.missIng) > 0):
+                ingredients = ", ".join(recipe.missIng)
+                RecipeFrame.RecipeSum.insert("1.0", f"Missing Ingredients: {ingredients} \n\n")
             
             #adds steps to the description box
             #recstep = ", ".join(steplist)
@@ -240,16 +206,6 @@ class RecipeFrame(Frame):
      
             #RecipeFrame.RecipeSum.insert("2.0", f"\nSteps: {recstep}")
             RecipeFrame.RecipeSum.config(state=DISABLED)
-            
-    def formatSummary(self, recipe):
-        word_concord=re.finditer(r"<b>(.+?)<\/b>",recipe.summary)
-        i = 0
-        for word_found in word_concord:
-            start = RecipeFrame.RecipeSum.index(f"1.0+{word_found.start()+len(recipe.title) + 2 - i*7} chars")
-            end = RecipeFrame.RecipeSum.index(f"1.0+{word_found.end()+len(recipe.title) + 2 - (i+1)*7} chars")
-            RecipeFrame.RecipeSum.tag_add('bold', start, end)
-            i += 1
-        RecipeFrame.RecipeSum.tag_configure("bold", font='Helvetica 14 bold')
         
 
 
