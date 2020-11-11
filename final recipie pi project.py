@@ -126,10 +126,10 @@ class RecipeFrame(Frame):
                 misname.append(misingredients['name'])
                     
 
-                
+                if(have in misname):
 
-            misname.remove(have)
-            print(misname)
+                    misname.remove(have)
+            print("your missing items are: {}".format(", ".join(misname)))
             #so we don't get more informaiton ona recipe more than once
             #if (hasattr(recipe, "summary")):
                 ##clear textbox
